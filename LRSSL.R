@@ -21,3 +21,8 @@ S1 <- X1%*%t(X1)/sqrt(rowSums(X1)%*%t(rowSums(X1)))
 S2 <- X2%*%t(X2)/sqrt(rowSums(X1)%*%t(rowSums(X1)))
 S3 <- X3%*%t(X3)/sqrt(rowSums(X3)%*%t(rowSums(X3)))
 
+S1 <- S1 - diag(S1)
+S2 <- S2 - diag(S2)
+S3 <- S3 - diag(S3)
+
+ind.knn1 <- sort
