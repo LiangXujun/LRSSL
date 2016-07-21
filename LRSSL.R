@@ -85,7 +85,7 @@ lrssl <- function(Xs, Ls, Y, mx, ml, mu, lam, gam, max.iter, eps){
     }
     
     if(t%%check.step == 0){
-      mesg <- sprintf("t = i, diffG mean = %.5f", t, mean(diff.G))
+      mesg <- sprintf("t = %i, diffG mean = %.5f", t, mean(diff.G))
       print(mesg)
     }
     if(mean(diff.G) < eps)
