@@ -9,6 +9,7 @@ get.knn.graph <- function(S, k){
   for(i in 1:n){
     ind <- get.knn(S[i,], k)
     S.knn[i,ind] <- 1
+    S.knn[ind,i] <- 1
   }
   return(S.knn)
 }
@@ -85,7 +86,7 @@ lrssl <- function(Xs, Ls, Y, mx, ml, mu, lam, gam, max.iter, eps){
     }
     
     if(t%%check.step == 0){
-      mesg <- sprintf("t = %i, diffG mean = %.5f", t, mean(diff.G))
+      mesg <- sprintf("t = %i, diffG mean = %.4e", t, mean(diff.G))
       print(mesg)
     }
     if(mean(diff.G) < eps)
@@ -93,7 +94,7 @@ lrssl <- function(Xs, Ls, Y, mx, ml, mu, lam, gam, max.iter, eps){
   }
   return(list(Gs = Gs, F.mat = F.mat, alpha = alpha, diff.G = diff.G, t = t))
 }
-###########################read training data#######################
+##############################read training data###################################################
 chem.mat <-read.table("./drug_pubchem_mat.txt", sep = "\t", header = T, row.names = 1)
 dom.mat <- read.table("./drug_target_domain_mat.txt", sep = "\t", header = T, row.names = 1)
 go.mat <- read.table("./drug_target_go_mat.txt", sep = "\t", header = T, row.names = 1)
@@ -109,7 +110,7 @@ n <- nrow(Y)
 c <- ncol(Y)
 
 Xs <- list(X1, X2, X3)
-###########################caculate knn graph########################
+##############################caculate knn graph###################################################
 k <- 10
 
 S1 <- t(X1)%*%X1/sqrt(colSums(X1)%*%t(colSums(X1)))
@@ -145,11 +146,34 @@ L3 <- D3 - S3.knn
 L4 <- D4 - S4.knn
 
 Ls <- list(L1, L2, L3, L4)
-##############################Training###############################
+##############################Training##############################################################
 mx <- 3
 ml <- 4
 mu <- 0.01
 lam <- 0.01
 gam <- 2
 
-train.res <- lrssl(Xs, Ls, Y, mx, ml, mu, lam, gam, 6000, 1e-6)
+train.res <- lrssl(Xs, Ls, Y, mx, ml, mu, lam, gam, 8000, 1e-6)
+###############################Indication prediction for new drugs#################################
+chem.mat.new <- read.table("./drug_without_ind_pubchem_mat_new.txt", sep = "\t", header = T, row.names = 1)
+dom.mat.new <- read.table("./drug_without_ind_dommat_new.txt", sep = "\t", header = T, row.names = 1)
+go.mat.new <- read.table("./drug_without_ind_gomat_new.txt", sep = "\t", header = T, row.names = 1)
+
+X1.new <- as.matrix(chem.mat.new)
+X2.new <- as.matrix(dom.mat.new)
+X3.new <- as.matrix(go.mat.new)
+
+G1 <- train.res$Gs[[1]]
+G2 <- train.res$Gs[[2]]
+G3 <- train.res$Gs[[3]]
+
+Y.pred1 <- X1.new%*%G1
+Y.pred2 <- X2.new%*%G2
+Y.pred3 <- X3.new%*%G3
+
+alpha <- train.res$alpha
+Y.pred <- alpha[1]*Y.pred1 + alpha[2]*Y.pred2 + alpha[3]*Y.pred3
+
+
+library(R.matlab)
+writeMat("~/data/drug_repos/side_ind_paper/novel_drug_predction/r_result.mat", G1 = train.res$Gs[[1]], G2 = train.res$Gs[[2]], G3 = train.res$Gs[[3]], F = train.res$F.mat, YPred = Y.pred)
