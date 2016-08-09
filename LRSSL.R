@@ -171,9 +171,15 @@ Y.pred1 <- X1.new%*%G1
 Y.pred2 <- X2.new%*%G2
 Y.pred3 <- X3.new%*%G3
 
+Y.pred1 <- Y.pred1/rowSums(Y.pred1)
+Y.pred2 <- Y.pred2/rowSums(Y.pred2)
+Y.pred3 <- Y.pred3/rowSums(Y.pred3)
+
 alpha <- train.res$alpha
 Y.pred <- alpha[1]*Y.pred1 + alpha[2]*Y.pred2 + alpha[3]*Y.pred3
 
 
 library(R.matlab)
-writeMat("~/data/drug_repos/side_ind_paper/novel_drug_predction/r_result.mat", G1 = train.res$Gs[[1]], G2 = train.res$Gs[[2]], G3 = train.res$Gs[[3]], F = train.res$F.mat, YPred = Y.pred)
+writeMat("~/data/drug_repos/side_ind_paper/novel_drug_predction/r_result.mat", G1 = train.res$Gs[[1]], G2 = train.res$Gs[[2]], G3 = train.res$Gs[[3]], 
+         F = train.res$F.mat, YPred = Y.pred, alpha = train.res$alpha, Y = Y,
+         X1 = X1, X2 = X2, X3 = X3)
