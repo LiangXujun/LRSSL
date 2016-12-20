@@ -10,6 +10,8 @@ get.knn.graph <- function(S, k){
     ind <- get.knn(S[i,], k)
     S.knn[i,ind] <- 1
     S.knn[ind,i] <- 1
+    #S.kkn[i,ind] <- S[i,ind]
+    #S.knn[ind,i] <- S[i,ind]
   }
   return(S.knn)
 }
@@ -126,6 +128,7 @@ for(i in 1:(n-1)){
   for(j in (i+1):n){
     s <- dis.sim[Y[i,]==1,Y[j,]==1]
     S4[i,j] <- max(s)
+    #S4[i,j] <- mean(s)
   }
 }
 S4 <- S4 + t(S4)
